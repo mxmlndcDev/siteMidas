@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #0C0B08;
+    --surface: #141210;
+    --surface-2: #1C1916;
+    --surface-3: #252118;
+    --border: #2C2920;
+    --text-primary: #F2EDE4;
+    --text-secondary: #7A7268;
+    --text-muted: #4A4540;
+    --accent: #C9A227;
+    --accent-light: #1A1508;
+    --red: #C43D2D;
+    --red-light: #2A1009;
+    --yellow: #C9A227;
+    --yellow-light: #1A1508;
+    /* Gold is the brand accent - replaces blue across all tokens */
+    --blue: #C9A227;
+    --blue-light: #1A1508;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  overflow-x: clip;
+}
+
+/* ---- Scroll reveal ---- */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 80ms; }
+.reveal-delay-2 { transition-delay: 160ms; }
+.reveal-delay-3 { transition-delay: 240ms; }
+.reveal-delay-4 { transition-delay: 320ms; }
+
+/* ---- Hero load-in ---- */
+@keyframes heroUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-anim {
+  animation: heroUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero-anim-2 { animation-delay: 120ms; }
+.hero-anim-3 { animation-delay: 240ms; }
+.hero-anim-4 { animation-delay: 360ms; }
+.hero-anim-5 { animation-delay: 480ms; }
+
+/* New editorial hero */
+.hero-in {
+  animation: heroUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero-in-delay { animation-delay: 200ms; }
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .hero-anim {
+    animation: none;
+    opacity: 1;
+  }
+}
