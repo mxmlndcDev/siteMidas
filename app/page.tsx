@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
-const CRM_URL = 'https://script.google.com/macros/s/AKfycbwB6Dl3jIGcVql9dgHKW6TpkPab2mRt2R6z-akGMCaMtfkEDg69dbxtSuENqQPkZyN2qg/exec';
+const CRM_URL = 'https://script.google.com/macros/s/AKfycbzGLLJxwH5-wtTis1KhijWPIXrdE2Eo56YBFGlOGMe6iac8H9Chv0u5gNMXvJ2CjTh4/exec';
 
 const SEDES = [
   {
