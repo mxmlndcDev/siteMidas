@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
-const CRM_URL = 'AQUI_VA_EL_LINK_DE_TU_CRM';
+const CRM_URL = 'https://script.google.com/macros/s/AKfycbwB6Dl3jIGcVql9dgHKW6TpkPab2mRt2R6z-akGMCaMtfkEDg69dbxtSuENqQPkZyN2qg/exec';
 
 const SEDES = [
   {
@@ -209,8 +209,18 @@ export default function LandingPage() {
     }
     setStatus('submitting');
     try {
-      const res = await fetch(CRM_URL, { method: 'POST', body: new FormData(form) });
-      if (!res.ok) throw new Error(`${res.status}`);
+      const data = {
+        nombre: (form.elements.namedItem('nombre') as HTMLInputElement).value,
+        nacimiento: (form.elements.namedItem('nacimiento') as HTMLInputElement).value,
+        whatsapp: (form.elements.namedItem('whatsapp') as HTMLInputElement).value,
+        sala: (form.elements.namedItem('sala') as HTMLSelectElement).value,
+      };
+      await fetch(CRM_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
       setStatus('success');
     } catch {
       setStatus('error');
