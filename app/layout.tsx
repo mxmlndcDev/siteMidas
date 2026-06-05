@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, DM_Sans } from "next/font/google";
+import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 
-const dmSerif = DM_Serif_Display({
-    weight: "400",
+const playfair = Playfair_Display({
     subsets: ["latin"],
-    variable: "--font-dm-serif",
+    variable: "--font-display",
+    weight: ["400", "500", "700"],
+    style: ["normal", "italic"],
 });
 
 const dmSans = DM_Sans({
-    subsets: ["latin", "latin-ext"],
-    weight: ["400", "500", "600", "700"],
-    variable: "--font-dm-sans",
+    subsets: ["latin"],
+    variable: "--font-body",
+    weight: ["300", "400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -25,8 +26,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="es">
-            <body className={`${dmSans.variable} ${dmSerif.variable} font-body antialiased selection:bg-blue-light selection:text-blue`}>
+        <html lang="es" className={`${playfair.variable} ${dmSans.variable}`}>
+            <body className="font-body antialiased selection:bg-blue-light selection:text-blue">
                 {children}
             </body>
         </html>

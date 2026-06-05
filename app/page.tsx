@@ -1,474 +1,756 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { ArrowRight, ArrowUpRight, MapPin } from 'lucide-react';
 
-// ─── PIN DURATION (extra scroll while hero is fixed) ─────────────────────────
-// Stagger: line1 80-280, line2 280-480, line3 480-680, sub 650-850, stat 750-950
-// Hero fully revealed at ~950px — hold complete hero until 1350px then unpin.
-const PIN_PX = 1350;
+const CRM_URL = 'AQUI_VA_EL_LINK_DE_TU_CRM';
 
 const SEDES = [
-  { src: '/images/fachada/bingo merlo.png',      name: 'Bingo Merlo',      loc: 'Merlo Centro' },
-  { src: '/images/fachada/bingo hurlingham.png', name: 'Bingo Hurlingham', loc: 'Hurlingham'   },
-  { src: '/images/fachada/bingo caseros.png',    name: 'Bingo Caseros',    loc: 'Caseros'      },
+  {
+    src: '/images/fachada/bingo ciudadela.png',
+    name: 'Bingo Ciudadela',
+    loc: 'Av. Rivadavia 11732, Ciudadela',
+    label: 'Sede ciudadela',
+    menuUrl: 'https://carta-bingo-ciudadela.netlify.app/',
+    mapsUrl: 'https://maps.google.com/?q=Av.+Rivadavia+11732+Ciudadela+Buenos+Aires',
+    pozo: '$4.2M',       // ← actualizar manualmente
+    slotTop: '$320K',    // ← actualizar manualmente
+    amenities: ['Seguridad'],
+    slots: [
+      'Lun–Mié: 07:00 a 06:00',
+      'Jue–Dom: 24 horas',
+    ],
+    bingo: 'Mié–Dom: 14:30 a 21:00',
+    juegos: [
+      { nombre: 'Bingo Extra', dias: 'Mié–Dom', detalle: '1% pozo · bolilla libre' },
+      { nombre: 'Bingo Oro', dias: 'Mié–Dom', detalle: '15% pozo · tope 42 · 15:30 16:30 17:30 18:30 19:30 20:30' },
+      { nombre: 'Bingo Plata', dias: 'Mié–Dom', detalle: '10% pozo · tope 46 · 15:30 16:30 17:30 18:30 19:30 20:30' },
+      { nombre: 'Jugada Especial', dias: 'Todos los Jueves', detalle: '5% pozo · 19:00 · bolilla libre' },
+    ],
+  },
+  {
+    src: '/images/fachada/bingo merlo.png',
+    name: 'Bingo Merlo',
+    loc: 'Av. del Libertador 753, Merlo',
+    label: 'Sede Merlo',
+    menuUrl: 'https://carta-bingo-merlo.netlify.app/',
+    mapsUrl: 'https://maps.google.com/?q=Av.+del+Libertador+753+Merlo+Buenos+Aires',
+    pozo: '$3.8M',
+    slotTop: '$280K',
+    amenities: ['Estacionamiento gratuito', 'Seguridad'],
+    slots: [
+      'Lun–Mié: 07:00 a 05:00',
+      'Jue–Dom: 24 horas',
+    ],
+    bingo: 'Lun–Dom: 15:00 a 21:00',
+    juegos: [
+      { nombre: 'Bingo Extra', dias: 'Todos los días', detalle: '1% pozo · bolilla libre' },
+      { nombre: 'Bingo Oro', dias: 'Todos los días', detalle: '15% pozo · tope 42 · 15:30 16:30 17:30 18:30 19:30 20:30' },
+      { nombre: 'Bingo Plata', dias: 'Todos los días', detalle: '10% pozo · tope 46 · 15:30 16:30 17:30 18:30 19:30 20:30' },
+      { nombre: 'Jugada Especial', dias: 'Todos los Jueves', detalle: '5% pozo · 19:00 · bolilla libre' },
+    ],
+  },
+  {
+    src: '/images/fachada/bingo hurlingham.png',
+    name: 'Bingo Hurlingham',
+    loc: 'Roca 2070, Hurlingham',
+    label: 'Sede Hurlingham',
+    menuUrl: 'https://carta-bingo-hurlingham.netlify.app/',
+    mapsUrl: 'https://maps.google.com/?q=Roca+2070+Hurlingham+Buenos+Aires',
+    pozo: '$2.1M',
+    slotTop: '$195K',
+    amenities: ['Estacionamiento gratuito', 'Seguridad'],
+    slots: [
+      'Jue–Dom: 08:00 a 04:00',
+      'Vie–Sáb y feriados: 08:00 a 05:00',
+    ],
+    bingo: 'Vie–Dom: 15:00 a 21:00',
+    juegos: [
+      { nombre: 'Bingo Extra', dias: 'Vie–Dom', detalle: '1% pozo · bolilla libre' },
+      { nombre: 'Bingo Oro', dias: 'Vie–Dom', detalle: '15% pozo · tope 42 · 15:30 16:30 17:30 18:30 19:30 20:30' },
+      { nombre: 'Bingo Plata', dias: 'Vie–Dom', detalle: '10% pozo · tope 46 · 15:30 16:30 17:30 18:30 19:30 20:30' },
+      { nombre: 'Jugada Especial', dias: 'Todos los Viernes', detalle: '5% pozo · 19:00 · bolilla libre' },
+    ],
+  },
+  {
+    src: '/images/fachada/bingo caseros.png',
+    name: 'Bingo Caseros',
+    loc: 'Av. San Martín 2780, Caseros',
+    label: 'Sede Caseros',
+    menuUrl: 'https://carta-bingo-caseros.netlify.app/',
+    mapsUrl: 'https://maps.google.com/?q=Av.+San+Martín+2780+Caseros+Buenos+Aires',
+    pozo: '$3.5M',
+    slotTop: '$260K',
+    amenities: ['Seguridad'],
+    slots: [
+      'Lun–Mié: 07:00 a 06:00',
+      'Jue–Dom: 24 horas',
+    ],
+    bingo: 'Mié–Dom: 14:00 a 21:00',
+    juegos: [
+      { nombre: 'Bingo Extra', dias: 'Mié–Dom', detalle: '1% pozo · bolilla libre' },
+      { nombre: 'Bingo Oro', dias: 'Mié–Dom', detalle: '15% pozo · tope 42 · 15:30 16:30 17:30 18:30 19:30 20:30' },
+      { nombre: 'Bingo Plata', dias: 'Mié–Dom', detalle: '10% pozo · tope 46 · 15:30 16:30 17:30 18:30 19:30 20:30' },
+      { nombre: 'Jugada Especial', dias: 'Todos los Sábados', detalle: '5% pozo · 19:00 · bolilla libre' },
+    ],
+  },
 ];
+
+type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
+
+const GALERIA = [
+  { src: '/images/galeria/01.png', alt: 'Sala de juegos Grupo Midas' },
+  { src: '/images/galeria/02.png', alt: 'Gastronomía Grupo Midas' },
+  { src: '/images/galeria/03.JPG', alt: 'Ambiente Grupo Midas' },
+  { src: '/images/galeria/04.png', alt: 'Premios Grupo Midas' },
+].slice(0, 4);
+
+function computeAge(birth: string): number {
+  const d = new Date(birth), n = new Date();
+  let a = n.getFullYear() - d.getFullYear();
+  const m = n.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && n.getDate() < d.getDate())) a--;
+  return a;
+}
+
+function PinIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M8 1a5 5 0 0 1 5 5c0 3.5-5 9-5 9S3 9.5 3 6a5 5 0 0 1 5-5zm0 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
+    </svg>
+  );
+}
 
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [expandedSede, setExpandedSede] = useState<string | null>(null);
+  const [status, setStatus] = useState<FormStatus>('idle');
+  const [ageError, setAgeError] = useState('');
 
+  // Focus management + Escape
   useEffect(() => {
-    // Respect reduced-motion preference
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!menuOpen) { menuBtnRef.current?.focus(); return; }
+    document.getElementById('menu-overlay')?.querySelector<HTMLElement>('button')?.focus();
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
 
-    let ctx: { revert: () => void } | null = null;
-
-    // Dynamic import keeps GSAP out of the SSR bundle
-    import('gsap').then(({ gsap }) =>
-      import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
-        gsap.registerPlugin(ScrollTrigger);
-
-        ctx = gsap.context(() => {
-          const hero = document.querySelector<HTMLElement>('#hero-section');
-          if (!hero) return;
-
-          // ── 1. Pin the hero for PIN_PX of extra scroll ──────────────────
-          ScrollTrigger.create({
-            trigger: hero,
-            start: 'top top',
-            end: `+=${PIN_PX}`,
-            pin: true,
-            pinSpacing: true,
-          });
-
-          // ── 2. Headline lines: clip-wipe up (each in its own timeline) ──
-          // Lines start clipped below their overflow-hidden container.
-          const lines = gsap.utils.toArray<HTMLElement>('.hero-line');
-          const lineRanges = [
-            [80, 300],
-            [280, 500],
-            [480, 700],
-          ] as const;
-
-          lines.forEach((line, i) => {
-            gsap.fromTo(
-              line,
-              { yPercent: 108, opacity: 0 },
-              {
-                yPercent: 0,
-                opacity: 1,
-                ease: 'power3.out',
-                scrollTrigger: {
-                  start: lineRanges[i][0],
-                  end: lineRanges[i][1],
-                  scrub: 1.4,
-                },
-              }
-            );
-          });
-
-          // ── 3. Subtext + CTAs ────────────────────────────────────────────
-          gsap.fromTo(
-            '.hero-sub',
-            { opacity: 0, y: 22 },
-            {
-              opacity: 1,
-              y: 0,
-              ease: 'power2.out',
-              scrollTrigger: { start: 650, end: 850, scrub: 1 },
-            }
-          );
-
-          // ── 4. Floating stat ─────────────────────────────────────────────
-          gsap.fromTo(
-            '.hero-stat',
-            { opacity: 0, y: 16 },
-            {
-              opacity: 1,
-              y: 0,
-              ease: 'power2.out',
-              scrollTrigger: { start: 750, end: 950, scrub: 1 },
-            }
-          );
-
-          // ── 5. Hero image: subtle zoom-out as lines reveal ───────────────
-          gsap.fromTo(
-            '.hero-image-wrap',
-            { scale: 1.07 },
-            {
-              scale: 1,
-              ease: 'none',
-              scrollTrigger: { start: 0, end: 900, scrub: 2 },
-            }
-          );
-
-          // ── 6. Feature items: staggered slide-up on enter ────────────────
-          // Motivation: hierarchy — the three pillars reveal in reading order.
-          gsap.utils.toArray<HTMLElement>('.feature-item').forEach((item, i) => {
-            gsap.fromTo(
-              item,
-              { opacity: 0, y: 36 },
-              {
-                opacity: 1,
-                y: 0,
-                duration: 0.9,
-                ease: 'power2.out',
-                delay: i * 0.14,
-                scrollTrigger: {
-                  trigger: item,
-                  start: 'top 84%',
-                  toggleActions: 'play none none none',
-                },
-              }
-            );
-          });
-
-          // ── 7. Ciudadela parallax (image moves slower than scroll) ───────
-          gsap.to('.sede-parallax', {
-            yPercent: -12,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: '.sede-hero',
-              start: 'top bottom',
-              end: 'bottom top',
-              scrub: 1,
-            },
-          });
-
-          // Ciudadela text overlay: fade up on enter
-          gsap.fromTo(
-            '.sede-overlay-text',
-            { opacity: 0, y: 24 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.8,
-              ease: 'power2.out',
-              scrollTrigger: {
-                trigger: '.sede-hero',
-                start: 'top 70%',
-                toggleActions: 'play none none none',
-              },
-            }
-          );
-
-          // Smaller sede cards stagger
-          gsap.utils.toArray<HTMLElement>('.sede-card').forEach((card, i) => {
-            gsap.fromTo(
-              card,
-              { opacity: 0, y: 28 },
-              {
-                opacity: 1,
-                y: 0,
-                duration: 0.7,
-                ease: 'power2.out',
-                delay: i * 0.12,
-                scrollTrigger: {
-                  trigger: card,
-                  start: 'top 86%',
-                  toggleActions: 'play none none none',
-                },
-              }
-            );
-          });
-
-          // ── 8. Club section ──────────────────────────────────────────────
-          // Tiers wipe in from left one by one
-          gsap.utils.toArray<HTMLElement>('.tier-item').forEach((item, i) => {
-            gsap.fromTo(
-              item,
-              { opacity: 0, x: -28 },
-              {
-                opacity: 1,
-                x: 0,
-                duration: 0.65,
-                ease: 'power2.out',
-                delay: i * 0.1,
-                scrollTrigger: {
-                  trigger: item,
-                  start: 'top 88%',
-                  toggleActions: 'play none none none',
-                },
-              }
-            );
-          });
-
-          // Form panel slides in from right
-          gsap.fromTo(
-            '.form-panel',
-            { opacity: 0, x: 32 },
-            {
-              opacity: 1,
-              x: 0,
-              duration: 0.9,
-              ease: 'power2.out',
-              scrollTrigger: {
-                trigger: '.form-panel',
-                start: 'top 82%',
-                toggleActions: 'play none none none',
-              },
-            }
-          );
-        }, containerRef);
-      })
+  // IntersectionObserver: scroll reveals
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return;
+    const els = root.querySelectorAll<HTMLElement>('.reveal');
+    if (!els.length) return;
+    const io = new IntersectionObserver(
+      entries => entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('revealed'); io.unobserve(e.target); }
+      }),
+      { threshold: 0.06 }
     );
-
-    return () => ctx?.revert();
+    els.forEach(el => io.observe(el));
+    return () => io.disconnect();
   }, []);
+
+  // GSAP: hero entrance only — `killed` prevents Strict Mode double-fire
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let killed = false;
+    let ctx: { revert: () => void } | null = null;
+    import('gsap').then(({ gsap }) => {
+      if (killed) return;
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          gsap.utils.toArray<HTMLElement>('.hero-line'),
+          { yPercent: 110, opacity: 0 },
+          { yPercent: 0, opacity: 1, ease: 'power3.out', duration: 1.1, stagger: 0.15, delay: 0.25 }
+        );
+        gsap.fromTo('.hero-sub',
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, ease: 'power2.out', duration: 0.9, delay: 0.8 }
+        );
+        gsap.fromTo('.hero-stat',
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, ease: 'power2.out', duration: 0.8, delay: 1 }
+        );
+      }, containerRef);
+    });
+    return () => { killed = true; ctx?.revert(); };
+  }, []);
+
+  // Parallax para las imágenes de fondo de galería
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const section = document.getElementById('galeria');
+    if (!section) return;
+    const handleScroll = () => {
+      const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+      const progress = window.scrollY - sectionTop;
+      document.querySelectorAll<HTMLElement>('.bg-parallax-img').forEach(img => {
+        const speed = parseFloat(img.dataset.speed ?? '0.2');
+        img.style.transform = `translateY(${progress * speed}px)`;
+      });
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setAgeError('');
+    const form = e.currentTarget;
+    const birthInput = form.elements.namedItem('nacimiento') as HTMLInputElement;
+    if (birthInput?.value && computeAge(birthInput.value) < 18) {
+      setAgeError('Debés ser mayor de 18 años para unirte al Club Midas.');
+      birthInput.focus();
+      return;
+    }
+    setStatus('submitting');
+    try {
+      const res = await fetch(CRM_URL, { method: 'POST', body: new FormData(form) });
+      if (!res.ok) throw new Error(`${res.status}`);
+      setStatus('success');
+    } catch {
+      setStatus('error');
+    }
+  };
+
+  const inputCls = (err?: boolean) =>
+    `w-full bg-transparent border-b text-sm text-text-primary placeholder:text-text-muted pb-3
+     focus:outline-none transition-[border-color] duration-200
+     ${err ? 'border-red-400 focus:border-red-400' : 'border-border focus:border-blue'}`;
 
   return (
     <div ref={containerRef} className="bg-bg text-text-primary font-body">
+      <div className="max-w-[1400px] mx-auto relative">
 
-      {/* ── Nav ─────────────────────────────────────────────────────────── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-14 border-b border-border/40 bg-bg/80 backdrop-blur-md">
-        <span className="font-display text-lg tracking-tight flex items-center gap-2">
-          <span className="inline-block w-2 h-2 rounded-full bg-blue" />
-          Grupo Midas
-        </span>
-        <div className="hidden md:flex items-center gap-8 text-[11px] tracking-[0.2em] uppercase text-text-secondary">
-          <a href="#sedes"  className="hover:text-text-primary transition-colors">Sedes</a>
-          <a href="#club"   className="hover:text-text-primary transition-colors">Club Midas</a>
-          <a href="#eventos"className="hover:text-text-primary transition-colors">Eventos</a>
+        {/* Ambient warm radial */}
+        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+          <div
+            className="absolute top-[-25%] left-[5%] w-[80vw] h-[80vw] rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(149,100,0,0.035) 0%, transparent 65%)' }}
+          />
         </div>
-        <a href="#club" className="text-[11px] tracking-[0.2em] uppercase border border-text-muted hover:border-blue hover:text-blue px-4 py-2 transition-all">
-          Unirse gratis
+
+        {/* ── Skip link ────────────────────────────────────────────────────── */}
+        <a
+          href="#hero-section"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[200] focus:bg-surface focus:text-blue focus:px-4 focus:py-2 focus:text-[10px] focus:tracking-widest focus:uppercase focus:border focus:border-border"
+        >
+          Saltar al contenido
         </a>
-      </nav>
 
-      {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <section id="hero-section" className="min-h-[100dvh] flex flex-col pt-14">
+        {/* ── Nav ──────────────────────────────────────────────────────────── */}
+        <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-14 bg-bg border-b border-border">
+          <img src="/Midas.svg" alt="Grupo Midas" className="h-[10px] w-auto" />
+          <button
+            ref={menuBtnRef}
+            onClick={() => setMenuOpen(true)}
+            aria-expanded={menuOpen}
+            aria-controls="menu-overlay"
+            className="vorszk-btn-text min-h-[44px] px-3 inline-flex items-center text-[10px] tracking-[0.3em] uppercase text-text-primary focus-visible:outline-1 focus-visible:outline-blue focus-visible:outline-offset-4"
+          >
+            Menu
+          </button>
+        </nav>
 
-        {/* Metadata strip */}
-        <div className="flex items-center justify-between px-6 md:px-12 py-4 border-b border-border/30">
-          <span className="text-[10px] tracking-[0.22em] uppercase text-text-muted">
-            Zona Oeste GBA &nbsp;·&nbsp; Bingo & Entretenimiento
-          </span>
-          <span className="text-[10px] tracking-[0.22em] uppercase text-blue">
-            Aniversario Ciudadela &nbsp;·&nbsp; Vie 27
-          </span>
+        {/* ── Menu overlay ─────────────────────────────────────────────────── */}
+        <div
+          id="menu-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menú de navegación"
+          aria-hidden={!menuOpen}
+          className={`fixed inset-0 z-[100] bg-bg flex flex-col px-6 md:px-12 py-16
+          transition-opacity duration-500
+          ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        >
+          <div className="flex justify-between items-center mb-16 pb-6 border-b border-border">
+            <img src="/Midas.svg" alt="Grupo Midas" className="h-[10px] w-auto" />
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="vorszk-btn-text min-h-[44px] px-3 inline-flex items-center text-[10px] tracking-[0.3em] uppercase text-text-muted hover:text-text-primary transition-colors focus-visible:outline-1 focus-visible:outline-blue focus-visible:outline-offset-4"
+            >
+              Cerrar
+            </button>
+          </div>
+
+          <nav className="flex flex-col gap-0">
+            {([
+              { href: '#sedes', label: 'Sedes' },
+              { href: '#galeria', label: 'Galería' },
+            ] as const).map(({ href, label }, i) => (
+              <a
+                key={label}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                style={{
+                  opacity: menuOpen ? 1 : 0,
+                  transform: menuOpen ? 'translateY(0)' : 'translateY(24px)',
+                  transition: 'opacity 480ms cubic-bezier(0.22,1,0.36,1), transform 480ms cubic-bezier(0.22,1,0.36,1)',
+                  transitionDelay: menuOpen ? `${i * 90 + 120}ms` : '0ms',
+                }}
+                className="font-display text-[13vw] md:text-[8vw] leading-[1] tracking-tight text-text-primary hover:text-blue transition-colors duration-200 py-1 border-b border-border"
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+
+          <div
+            className="mt-auto pt-8 border-t border-border flex items-center justify-between"
+            style={{
+              opacity: menuOpen ? 1 : 0,
+              transform: menuOpen ? 'translateY(0)' : 'translateY(12px)',
+              transition: 'opacity 480ms ease, transform 480ms ease',
+              transitionDelay: menuOpen ? '300ms' : '0ms',
+            }}
+          >
+            <span className="text-[10px] tracking-[0.2em] uppercase text-text-muted">Zona Oeste GBA</span>
+            <a
+              href="#contacto"
+              onClick={() => setMenuOpen(false)}
+              className="text-[10px] tracking-[0.2em] uppercase px-4 py-2 hover:opacity-80 transition-opacity focus-visible:outline-1 focus-visible:outline-blue focus-visible:outline-offset-2"
+              style={{ background: '#111111', color: '#FFFFFF', borderRadius: '4px' }}
+            >
+              Unirse gratis
+            </a>
+          </div>
         </div>
 
-        {/* Main two-col */}
-        <div className="flex-1 grid md:grid-cols-[58%_42%]">
+        {/* ── Hero ─────────────────────────────────────────────────────────── */}
+        <section id="hero-section" className="min-h-[100dvh] flex flex-col pt-14 border-b border-border">
 
-          {/* Left: headline */}
-          <div className="flex flex-col justify-between px-6 md:px-12 py-12 md:py-16 border-r border-border/30">
-
-            {/* Lines each wrapped in overflow-hidden for clip wipe */}
-            <div className="space-y-0">
-              <div className="overflow-hidden leading-none">
-                <h1 className="hero-line font-display text-[13vw] md:text-[8.5vw] leading-[0.92] tracking-tighter">
-                  Experi-
-                </h1>
-              </div>
-              <div className="overflow-hidden leading-none">
-                <h1 className="hero-line font-display text-[13vw] md:text-[8.5vw] leading-[0.92] tracking-tighter">
-                  encia
-                </h1>
-              </div>
-              <div className="overflow-hidden leading-none pb-1">
-                <h1 className="hero-line font-display text-[13vw] md:text-[8.5vw] leading-[0.92] tracking-tighter italic">
-                  Premium.
-                </h1>
-              </div>
+          <div className="flex-1 flex flex-col justify-between px-6 md:px-12 py-16 md:py-24">
+            <div className="relative">
+            <img
+              src="/logomidas.png"
+              alt=""
+              aria-hidden="true"
+              className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-[26vw] max-w-[320px] opacity-90 animate-float select-none pointer-events-none"
+            />
+            <h1 className="max-w-[90vw]" aria-label="Experiencia Premium">
+              <span className="block overflow-hidden leading-none">
+                <span className="hero-line block font-display text-[15vw] md:text-[10vw] leading-[0.88] tracking-tighter text-text-primary">
+                  Vení
+                </span>
+              </span>
+              <span className="block overflow-hidden leading-none">
+                <span className="hero-line block font-display text-[15vw] md:text-[10vw] leading-[0.88] tracking-tighter text-text-primary">
+                  a jugar
+                </span>
+              </span>
+              <span className="block overflow-hidden leading-none pb-1">
+                <span className="hero-line block font-display text-[15vw] md:text-[10vw] leading-[0.88] tracking-tighter italic text-blue">
+                  y divertirte.
+                </span>
+              </span>
+            </h1>
             </div>
 
-            {/* Subtext + CTAs */}
-            <div className="hero-sub space-y-6 opacity-0">
-              <p className="text-text-secondary text-sm md:text-base leading-relaxed max-w-sm">
-                Las mejores salas de bingo, gastronomia de primer nivel y los sorteos mas espectaculares del conurbano.
+            <div className="hero-sub flex flex-col md:flex-row md:items-end justify-between gap-8">
+              <p className="text-text-secondary text-sm md:text-base leading-relaxed max-w-xs">
+                Hace más de 20 años ofrecemos entretenimiento, diversión y conexión real entre nuestros clientes.
               </p>
               <div className="flex items-center gap-8">
-                <a href="#club" className="group inline-flex items-center gap-2 text-sm font-medium text-text-primary hover:text-blue transition-colors">
+                <a
+                  href="#contacto"
+                  className="vorszk-btn-text group inline-flex items-center gap-2 min-h-[44px] text-[10px] tracking-[0.2em] uppercase text-text-primary hover:text-blue transition-colors"
+                >
                   Unirse gratis
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <span className="inline-block group-hover:translate-x-1 transition-transform">→</span>
                 </a>
-                <a href="#sedes" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
+                <a
+                  href="#sedes"
+                  className="vorszk-btn-text inline-flex items-center min-h-[44px] text-[10px] tracking-[0.2em] uppercase text-text-muted hover:text-text-primary transition-colors"
+                >
                   Ver sedes
                 </a>
               </div>
             </div>
           </div>
 
-          {/* Right: image */}
-          <div className="hidden md:block relative overflow-hidden">
-            <div className="hero-image-wrap w-full h-full">
-              <Image
-                src="/images/hero.jpg"
-                alt="Grupo Midas — experiencia premium"
-                fill
-                sizes="42vw"
-                className="object-cover object-center"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-bg/50 to-transparent" />
-            </div>
-
-            {/* Floating stat */}
-            <div className="hero-stat absolute bottom-8 left-8 opacity-0">
-              <div className="text-[10px] tracking-[0.2em] uppercase text-text-muted mb-1.5">Premios entregados</div>
-              <div className="font-display text-5xl text-blue leading-none">+50M</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats bottom strip */}
-        <div className="flex items-center justify-between px-6 md:px-12 py-4 border-t border-border/30">
-          <div className="flex items-center gap-8">
-            {([['1000+','Puestos'],['4','Salas'],['+$50M','Pozo']] as const).map(([v,l]) => (
-              <div key={l} className="flex items-baseline gap-2">
-                <span className="font-display text-xl">{v}</span>
-                <span className="text-[10px] tracking-widest uppercase text-text-muted">{l}</span>
+          <div className="hero-stat flex items-center justify-between px-6 md:px-12 py-4 border-t border-border">
+            {([
+              { val: '1000+', label: 'Puestos', aria: 'Más de 1000 puestos' },
+              { val: '4', label: 'Salas', aria: '4 salas' },
+              { val: '+$50M', label: 'Pozo', aria: 'Más de 50 millones en premios' },
+            ] as const).map(({ val, label, aria }) => (
+              <div key={label} className="flex items-baseline gap-2" role="group" aria-label={aria}>
+                <span className="font-display text-2xl md:text-3xl text-text-primary">{val}</span>
+                <span className="text-[10px] tracking-widest uppercase text-text-muted" aria-hidden="true">{label}</span>
               </div>
             ))}
-          </div>
-          <a href="#sedes" className="hidden md:flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-text-secondary hover:text-text-primary transition-colors">
-            Conocer mas <ArrowUpRight className="w-3 h-3" />
-          </a>
-        </div>
-      </section>
-
-      {/* ── Features ───────────────────────────────────────────────────── */}
-      <section className="px-6 md:px-12 py-24 md:py-32 border-t border-border/40">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-3">
-          {[
-            { n:'01', t:'Slots y Bingo',    d:'Las mejores maquinas de ultima generacion y salas de bingo tradicionales, abiertas los siete dias.' },
-            { n:'02', t:'Gastronomia',      d:'Restaurantes de primer nivel, menus especiales, cafeteria y barra de tragos para acompanar tu juego.' },
-            { n:'03', t:'Seguridad Premium',d:'Ambiente seguro, climatizado y controlado. Estacionamiento vigilado y personal capacitado disponible.' },
-          ].map((f, i) => (
-            <div
-              key={f.t}
-              className={`feature-item py-10 md:py-0 opacity-0 border-t md:border-t-0 border-border/40 ${i > 0 ? 'md:border-l md:pl-10' : ''} ${i < 2 ? 'md:pr-10' : ''}`}
+            <a
+              href="#sedes"
+              className="vorszk-btn-text hidden md:flex items-center gap-1 text-[10px] tracking-widest uppercase text-text-muted hover:text-text-primary transition-colors"
             >
-              <span className="block font-display text-[10px] tracking-widest uppercase text-blue mb-6">{f.n}</span>
-              <h3 className="font-display text-2xl md:text-3xl mb-4 leading-tight">{f.t}</h3>
-              <p className="text-text-secondary text-sm leading-relaxed">{f.d}</p>
+              Explorar ↗
+            </a>
+          </div>
+        </section>
+
+        {/* ── Sedes ────────────────────────────────────────────────────────── */}
+        <section id="sedes" className="border-t border-border">
+
+          <div className="px-6 md:px-12 py-14 border-b border-border">
+            <span className="text-[10px] tracking-[0.28em] uppercase text-text-muted">Nuestras sedes</span>
+            <div className="overflow-hidden mt-4">
+              <h2 className="reveal font-display text-4xl md:text-6xl leading-tight max-w-2xl text-text-primary">
+                Cuatro salas,<br />
+                una sola <em>experiencia.</em>
+              </h2>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
 
-      {/* ── Sedes ──────────────────────────────────────────────────────── */}
-      <section id="sedes" className="border-t border-border/40">
+          {/* Cards apiladas */}
+          <div className="flex flex-col gap-4 px-4 md:px-6 pb-6 border-b border-border">
+            {SEDES.map((s, i) => {
+              const isExpanded = expandedSede === s.name;
+              return (
+                <div
+                  key={s.name}
+                  style={{ '--index': i } as React.CSSProperties}
+                  className="reveal sede-card group overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
+                >
 
-        {/* Ciudadela hero */}
-        <div className="sede-hero relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden">
-          <div className="sede-parallax w-full h-[120%] absolute inset-0 -top-[10%]">
-            <Image
-              src="/images/fachada/bingo ciudadela.png"
-              alt="Bingo Ciudadela"
-              fill
-              sizes="100vw"
-              className="object-cover"
+                  {/* ── Header: label + nombre + dirección + botones ── */}
+                  <div className="flex items-start justify-between gap-4 px-6 md:px-8 pt-6 pb-5 border-b border-border">
+                    <div>
+                      <span className="block text-[9px] tracking-[0.28em] uppercase text-text-muted mb-1.5">
+                        {s.label}
+                      </span>
+                      <span className="font-display text-2xl md:text-4xl tracking-tight text-text-primary leading-none">
+                        {s.name}
+                      </span>
+                      <p className="flex items-center gap-1 mt-2 text-[11px] text-text-muted">
+                        <PinIcon className="w-3 h-3 shrink-0" />
+                        {s.loc}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 pt-1 shrink-0">
+                      <a
+                        href={s.menuUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="vorszk-btn border border-border hover:border-blue px-3 py-2 text-[9px] tracking-[0.2em] uppercase text-text-secondary hover:text-bg transition-colors duration-300"
+                      >
+                        <span className="vorszk-btn-fill absolute inset-0 bg-blue translate-y-full transition-transform duration-300 ease-in-out" />
+                        <span className="relative z-10">Ver carta</span>
+                      </a>
+                      <a
+                        href={s.mapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Cómo llegar a ${s.name}`}
+                        className="group/pin w-9 h-9 rounded-full border border-border flex items-center justify-center hover:border-blue hover:text-blue transition-all duration-300 text-text-muted"
+                      >
+                        <PinIcon className="w-3.5 h-3.5 group-hover/pin:scale-110 transition-transform duration-300" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* ── Stats bar: Pozo + Slot top ── */}
+                  <div
+                    className="flex items-center gap-8 px-6 md:px-8 py-4 border-b border-border"
+                    style={{ background: 'var(--surface-3)' }}
+                  >
+                    <div>
+                      <span className="block text-[9px] tracking-[0.22em] uppercase text-text-muted mb-0.5">Pozo</span>
+                      <span className="font-display text-2xl md:text-3xl leading-none" style={{ color: '#956400' }}>
+                        {s.pozo}
+                      </span>
+                    </div>
+                    <div className="w-px h-8 bg-border" />
+                    <div>
+                      <span className="block text-[9px] tracking-[0.22em] uppercase text-text-muted mb-0.5">Slot top</span>
+                      <span className="font-display text-2xl md:text-3xl leading-none text-text-primary">
+                        {s.slotTop}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* ── Body: horarios izquierda + imagen derecha ── */}
+                  <div className="grid md:grid-cols-[1fr_44%]">
+
+                    {/* Info */}
+                    <div className="flex flex-col justify-between p-6 md:p-8 gap-6 md:border-r border-border">
+                      <div className="space-y-5">
+
+                        {/* Horarios */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <span className="block text-[9px] tracking-[0.22em] uppercase text-text-muted mb-1.5">Slots</span>
+                            {s.slots.map(h => (
+                              <div key={h} className="text-[11px] text-text-secondary leading-relaxed">{h}</div>
+                            ))}
+                          </div>
+                          <div>
+                            <span className="block text-[9px] tracking-[0.22em] uppercase text-text-muted mb-1.5">Bingo</span>
+                            <div className="text-[11px] text-text-secondary leading-relaxed">{s.bingo}</div>
+                          </div>
+                        </div>
+
+                        {/* Amenities */}
+                        {s.amenities.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {s.amenities.map(a => (
+                              <span key={a} className="text-[9px] tracking-[0.15em] uppercase text-text-muted border border-border rounded-full px-3 py-1">
+                                {a}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Ver jugadas — acordeón trigger */}
+                      <button
+                        onClick={() => setExpandedSede(isExpanded ? null : s.name)}
+                        aria-expanded={isExpanded}
+                        className="group/pill self-start inline-flex items-center gap-3 border border-border hover:border-blue rounded-full pl-5 pr-2 py-2 transition-all duration-300 min-h-[44px]"
+                      >
+                        <span className="text-[9px] tracking-[0.2em] uppercase text-text-secondary group-hover/pill:text-text-primary transition-colors duration-300">
+                          {isExpanded ? 'Cerrar' : 'Ver jugadas'}
+                        </span>
+                        <span className="w-6 h-6 rounded-full bg-border flex items-center justify-center group-hover/pill:bg-blue group-hover/pill:text-surface transition-all duration-300 text-xs">
+                          <span className={`inline-block transition-transform duration-300 ${isExpanded ? 'rotate-45' : ''}`}>+</span>
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* Imagen full-height */}
+                    <div className="relative min-h-[260px] md:min-h-0 overflow-hidden border-t md:border-t-0 border-border">
+                      <Image
+                        src={s.src}
+                        alt={`Fachada de ${s.name}, ${s.loc}`}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 25vw"
+                        priority={i === 0}
+                        className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                        style={{ filter: 'saturate(0.82) brightness(0.96)' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ── Acordeón de juegos ── */}
+                  <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <div className="mx-6 md:mx-8 border-t border-border divide-y divide-border py-2">
+                      {s.juegos.map(j => (
+                        <div key={j.nombre} className="py-3 flex flex-col gap-0.5">
+                          <div className="flex items-start justify-between gap-4">
+                            <span className="font-display text-sm text-text-primary">{j.nombre}</span>
+                            <span className="text-[9px] tracking-wide text-blue uppercase shrink-0">{j.dias}</span>
+                          </div>
+                          <span className="text-[10px] text-text-muted leading-relaxed">{j.detalle}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── Galería + Contacto ───────────────────────────────────────────── */}
+        <section id="galeria" className="border-t border-border">
+
+          {/* Texto sticky + imágenes de fondo en parallax */}
+          <div className="relative" style={{ minHeight: '220vh' }}>
+
+            {/* Imágenes de fondo — pequeñas, desaturadas, parallax */}
+            {([
+              { src: '/images/galeria/01.png', top: '8%', left: '4%', w: '16vw', maxW: 140, speed: 0.15 },
+              { src: '/images/galeria/02.png', top: '22%', right: '5%', w: '13vw', maxW: 115, speed: 0.28 },
+              { src: '/images/galeria/03.JPG', top: '52%', left: '7%', w: '15vw', maxW: 130, speed: 0.20 },
+              { src: '/images/galeria/04.png', top: '68%', right: '8%', w: '18vw', maxW: 155, speed: 0.12 },
+            ] as const).map((img, i) => (
+              <div
+                key={img.src}
+                className="bg-parallax-img absolute overflow-hidden rounded-xl pointer-events-none"
+                data-speed={img.speed}
+                style={{
+                  top: img.top,
+                  left: 'left' in img ? img.left : undefined,
+                  right: 'right' in img ? img.right : undefined,
+                  width: `clamp(72px, ${img.w}, ${img.maxW}px)`,
+                  aspectRatio: '3/4',
+                  opacity: 0.28,
+                }}
+              >
+                <Image
+                  src={img.src}
+                  alt=""
+                  aria-hidden="true"
+                  fill
+                  sizes="160px"
+                  className="object-cover"
+                  style={{ filter: 'saturate(0.25) brightness(0.92)' }}
+                />
+              </div>
+            ))}
+
+            {/* Texto sticky centrado */}
+            <div className="sticky top-0 h-screen flex flex-col items-center justify-center text-center px-6 md:px-12 pointer-events-none z-10">
+              <span className="reveal block text-[10px] tracking-[0.28em] uppercase text-text-muted mb-6">
+                La experiencia
+              </span>
+              <h2 className="reveal font-display text-4xl md:text-6xl lg:text-7xl leading-tight tracking-tighter text-text-primary max-w-2xl">
+                Más que un juego.<br />
+                Un <em>lugar.</em>
+              </h2>
+              <p className="reveal text-text-secondary text-sm md:text-base leading-relaxed max-w-sm mt-8">
+                Gastronomía, ambiente seguro, comodidad y excelentes slots.
+              </p>
+            </div>
+          </div>
+
+          {/* Form al pie */}
+          <div id="contacto" className="px-6 md:px-12 py-20 md:py-28 border-t border-border mt-4">
+            <div className="max-w-lg mx-auto">
+
+              <div className="text-center mb-12">
+                <span className="reveal block text-[10px] tracking-[0.28em] uppercase text-text-muted mb-4">
+                  Contacto
+                </span>
+                <h2 className="reveal font-display text-4xl md:text-5xl leading-tight tracking-tighter text-text-primary">
+                  Sumate<br /><em>gratis.</em>
+                </h2>
+                <p className="reveal text-text-secondary text-sm leading-relaxed mt-4 max-w-xs mx-auto">
+                  Completá tus datos y enterate de todo.
+                </p>
+              </div>
+
+              {status === 'success' ? (
+                <div aria-live="polite" aria-atomic="true" className="text-center py-8">
+                  <span className="block text-[10px] tracking-[0.28em] uppercase mb-6" style={{ color: '#956400' }}>
+                    Registro confirmado
+                  </span>
+                  <p className="font-display text-3xl leading-tight mb-5 text-text-primary">
+                    Bienvenido al<br /><em>Grupo Midas.</em>
+                  </p>
+                  <p className="text-text-secondary text-sm leading-relaxed max-w-xs mx-auto">
+                    Pronto recibirás novedades y beneficios exclusivos.
+                  </p>
+                </div>
+              ) : (
+                <form className="space-y-8" onSubmit={handleSubmit} noValidate>
+
+                  {status === 'error' && (
+                    <p
+                      role="alert"
+                      className="text-[10px] tracking-[0.2em] uppercase px-4 py-3 rounded-[4px]"
+                      style={{ background: '#FDEBEC', color: '#9F2F2D', border: '1px solid rgba(159,47,45,0.18)' }}
+                    >
+                      Hubo un problema al enviar. Intentá de nuevo.
+                    </p>
+                  )}
+
+                  <label className="block">
+                    <span className="block text-[10px] tracking-[0.2em] uppercase text-text-muted mb-3">Nombre y Apellido</span>
+                    <input
+                      type="text" name="nombre" required minLength={2} maxLength={120}
+                      placeholder="Tu nombre completo"
+                      className={inputCls()}
+                    />
+                  </label>
+
+                  <div className="grid grid-cols-2 gap-8">
+                    <div>
+                      <label className="block">
+                        <span className="block text-[10px] tracking-[0.2em] uppercase text-text-muted mb-3">Fecha de nacimiento</span>
+                        <input
+                          type="date" name="nacimiento" required
+                          max={new Date(new Date().setFullYear(new Date().getFullYear() - 18))
+                            .toISOString().split('T')[0]}
+                          aria-describedby={ageError ? 'age-error' : undefined}
+                          className={inputCls(!!ageError)}
+                        />
+                      </label>
+                      {ageError && (
+                        <p id="age-error" role="alert" className="mt-2 text-[10px] leading-snug" style={{ color: '#9F2F2D' }}>
+                          {ageError}
+                        </p>
+                      )}
+                    </div>
+                    <label className="block">
+                      <span className="block text-[10px] tracking-[0.2em] uppercase text-text-muted mb-3">WhatsApp</span>
+                      <input
+                        type="tel" name="whatsapp" required placeholder="+54 11 ..."
+                        pattern="[\d\s\+\-\(\)]{7,20}"
+                        className={inputCls()}
+                      />
+                    </label>
+                  </div>
+
+                  <label className="block">
+                    <span className="block text-[10px] tracking-[0.2em] uppercase text-text-muted mb-3">Sala favorita</span>
+                    <div className="relative">
+                      <select name="sala" required className={inputCls() + ' appearance-none cursor-pointer'}>
+                        <option value="">Elegir sede</option>
+                        <option value="ciudadela">Ciudadela</option>
+                        <option value="merlo">Merlo</option>
+                        <option value="hurlingham">Hurlingham</option>
+                        <option value="caseros">Caseros</option>
+                      </select>
+                      <span className="absolute right-0 bottom-3.5 text-[11px] text-text-muted pointer-events-none select-none">▾</span>
+                    </div>
+                  </label>
+
+                  <button
+                    type="submit"
+                    disabled={status === 'submitting'}
+                    className="vorszk-btn group w-full border border-blue text-blue py-4 text-[11px] tracking-[0.2em] uppercase font-medium transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue"
+                  >
+                    <span className="vorszk-btn-fill absolute inset-0 bg-blue translate-y-full transition-transform duration-300 ease-in-out" />
+                    <span className="relative z-10 group-hover:text-bg transition-colors duration-300">
+                      {status === 'submitting' ? 'Enviando…' : 'Quiero ser parte'}
+                    </span>
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+
+        </section>
+
+        {/* ── Footer ───────────────────────────────────────────────────────── */}
+        <footer className="border-t border-border px-6 md:px-12 pt-10 pb-8">
+
+          {/* Logo Grupo Midas — centrado, tamaño grande */}
+          <div className="flex justify-center items-center py-8 md:py-10 border-b border-border">
+            <img
+              src="/Midas.svg"
+              alt="Grupo Midas"
+              className="h-4 md:h-6 w-auto"
+              style={{ maxWidth: '60vw' }}
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/20 to-transparent" />
-          <div className="sede-overlay-text opacity-0 absolute bottom-0 left-0 right-0 px-6 md:px-12 py-8 md:py-12 flex items-end justify-between">
-            <div>
-              <span className="block text-[10px] tracking-[0.22em] uppercase text-text-muted mb-2">Sede central</span>
-              <h2 className="font-display text-4xl md:text-6xl leading-none">Bingo Ciudadela</h2>
-            </div>
-            <div className="hidden md:flex items-center gap-2 text-text-secondary text-sm">
-              <MapPin className="w-4 h-4" />Ciudadela Centro
-            </div>
+
+          {/* Bottom row: Lotería logo izquierda · Leyenda legal derecha */}
+          <div className="flex items-end justify-between gap-6 pt-6">
+
+            {/* Logo Lotería Provincia de Buenos Aires */}
+            <img
+              src="/loreria.svg"
+              alt="Lotería de la Provincia de Buenos Aires"
+              className="h-9 md:h-11 w-auto shrink-0"
+            />
+
+            {/* Leyenda legal */}
+            <p className="text-[10px] tracking-wide text-text-muted text-right leading-relaxed max-w-xs">
+              Jugar compulsivamente es perjudicial<br />
+              para la salud. Ley Nro. 15.131<br />
+              Línea confidencial y gratuita<br />
+              0800-444-4000
+            </p>
+
           </div>
-        </div>
-
-        {/* Tres sedes */}
-        <div className="grid md:grid-cols-3 border-t border-border/40">
-          {SEDES.map((s, i) => (
-            <div key={s.name} className={`sede-card opacity-0 relative aspect-square overflow-hidden group ${i > 0 ? 'border-l border-border/40' : ''}`}>
-              <Image src={s.src} alt={s.name} fill sizes="33vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 px-5 md:px-8 py-6">
-                <div className="font-display text-lg md:text-2xl text-white">{s.name}</div>
-                <div className="flex items-center gap-1.5 text-white/50 text-xs mt-1">
-                  <MapPin className="w-3 h-3" />{s.loc}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Club Midas ─────────────────────────────────────────────────── */}
-      <section id="club" className="border-t border-border/40 px-6 md:px-12 py-24 md:py-32">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 md:gap-24">
-
-          {/* Tiers */}
-          <div>
-            <span className="block text-[10px] tracking-[0.22em] uppercase text-blue mb-8">Membresia gratuita</span>
-            <h2 className="font-display text-4xl md:text-5xl leading-tight mb-10">Club Midas</h2>
-            <div className="divide-y divide-border/40">
-              {[
-                { tier:'Classic',  desc:'Tarritos de regalo por asistencia' },
-                { tier:'Silver',   desc:'Descuentos del 10% en gastronomia' },
-                { tier:'Gold',     desc:'Menu sin cargo y sorpresas especiales' },
-                { tier:'Platinum', desc:'Atencion VIP, tragos y valet parking' },
-              ].map((t) => (
-                <div key={t.tier} className="tier-item opacity-0 flex items-center justify-between py-5 group cursor-default">
-                  <span className="font-display text-xl group-hover:text-blue transition-colors duration-300">{t.tier}</span>
-                  <span className="text-text-secondary text-xs tracking-wide text-right max-w-[200px]">{t.desc}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Form */}
-          <div className="form-panel opacity-0 pt-2">
-            <h3 className="font-display text-3xl md:text-4xl mb-2">Sumate gratis</h3>
-            <p className="text-text-secondary text-sm mb-10">Completa tus datos y empieza a disfrutar.</p>
-
-            <form className="space-y-8" action="AQUI_VA_EL_LINK_DE_TU_CRM" method="POST">
-              <label className="block">
-                <span className="block text-[10px] tracking-[0.2em] uppercase text-text-muted mb-3">Nombre y Apellido</span>
-                <input type="text" required placeholder="Tu nombre completo"
-                  className="w-full bg-transparent border-b border-border text-sm text-text-primary placeholder:text-text-muted pb-3 focus:outline-none focus:border-blue transition-colors" />
-              </label>
-              <div className="grid grid-cols-2 gap-8">
-                <label className="block">
-                  <span className="block text-[10px] tracking-[0.2em] uppercase text-text-muted mb-3">Fecha de nacimiento</span>
-                  <input type="date" required
-                    className="w-full bg-transparent border-b border-border text-sm text-text-secondary pb-3 focus:outline-none focus:border-blue transition-colors" />
-                </label>
-                <label className="block">
-                  <span className="block text-[10px] tracking-[0.2em] uppercase text-text-muted mb-3">WhatsApp</span>
-                  <input type="tel" required placeholder="+54 11 ..."
-                    className="w-full bg-transparent border-b border-border text-sm text-text-primary placeholder:text-text-muted pb-3 focus:outline-none focus:border-blue transition-colors" />
-                </label>
-              </div>
-              <label className="block">
-                <span className="block text-[10px] tracking-[0.2em] uppercase text-text-muted mb-3">Sala favorita</span>
-                <div className="relative">
-                  <select required
-                    className="w-full bg-transparent border-b border-border text-sm text-text-secondary pb-3 focus:outline-none focus:border-blue transition-colors appearance-none cursor-pointer">
-                    <option value="">Elegir sede</option>
-                    <option value="ciudadela">Ciudadela</option>
-                    <option value="merlo">Merlo</option>
-                    <option value="hurlingham">Hurlingham</option>
-                    <option value="caseros">Caseros</option>
-                  </select>
-                  <ArrowRight className="absolute right-0 bottom-3.5 w-3 h-3 text-text-muted pointer-events-none rotate-90" />
-                </div>
-              </label>
-              <button type="submit"
-                className="w-full border border-blue text-blue hover:bg-blue hover:text-bg active:scale-[0.99] py-4 text-[11px] tracking-[0.2em] uppercase font-medium transition-all">
-                Quiero ser parte
-              </button>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
-      <footer className="border-t border-border/40 px-6 md:px-12 py-6 flex items-center justify-between">
-        <span className="font-display text-sm">Grupo Midas</span>
-        <span className="text-[10px] tracking-wide text-text-muted">
-          Solo mayores de 18 anos. Jugar compulsivamente es perjudicial para la salud.
-        </span>
-      </footer>
+        </footer>
+      </div>{/* /max-w-[1400px] */}
     </div>
   );
 }

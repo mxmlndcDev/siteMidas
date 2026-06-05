@@ -4,23 +4,25 @@
 
 @layer base {
   :root {
-    --bg: #0C0B08;
-    --surface: #141210;
-    --surface-2: #1C1916;
-    --surface-3: #252118;
-    --border: #2C2920;
-    --text-primary: #F2EDE4;
-    --text-secondary: #7A7268;
-    --text-muted: #4A4540;
-    --accent: #C9A227;
-    --accent-light: #1A1508;
-    --red: #C43D2D;
-    --red-light: #2A1009;
-    --yellow: #C9A227;
-    --yellow-light: #1A1508;
-    /* Gold is the brand accent - replaces blue across all tokens */
-    --blue: #C9A227;
-    --blue-light: #1A1508;
+    /* ── Warm monochrome canvas ── */
+    --bg:             #F7F6F3;
+    --surface:        #FFFFFF;
+    --surface-2:      #F9F9F8;
+    --surface-3:      #F4F2EE;
+
+    /* ── Borders: opaque for Tailwind opacity modifiers to work ── */
+    --border:         #E8E6E1;
+
+    /* ── Text ── */
+    --text-primary:   #111111;
+    --text-secondary: #787774;
+    --text-muted:     #AEACA7;
+
+    /* ── Midas gold → warm amber, readable on light bg ── */
+    --blue:           #956400;
+    --blue-light:     #FBF3DB;
+    --accent:         #956400;
+    --accent-light:   #FBF3DB;
   }
 }
 
@@ -34,54 +36,94 @@ body {
   overflow-x: clip;
 }
 
-/* ---- Scroll reveal ---- */
-.reveal {
+/* ── Hero: start invisible so GSAP controls entrance ── */
+.hero-line,
+.hero-meta,
+.hero-sub,
+.hero-stat {
   opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.reveal.visible {
+/* ── Scroll reveal via IntersectionObserver ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity  600ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--index, 0) * 80ms);
+}
+
+.reveal.revealed {
   opacity: 1;
   transform: translateY(0);
 }
 
-.reveal-delay-1 { transition-delay: 80ms; }
-.reveal-delay-2 { transition-delay: 160ms; }
-.reveal-delay-3 { transition-delay: 240ms; }
-.reveal-delay-4 { transition-delay: 320ms; }
-
-/* ---- Hero load-in ---- */
-@keyframes heroUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* ── Galería flotante: posiciones desktop (evita Tailwind JIT purge) ── */
+@media (min-width: 768px) {
+  .gallery-item { width: auto; margin-bottom: 0; }
+  .gallery-item-0 { margin-left: auto;  margin-right: 5%;  width: 22%; }
+  .gallery-item-1 { margin-left: 8%;   margin-right: auto; width: 18%; }
+  .gallery-item-2 { margin-left: auto;  margin-right: 12%; width: 20%; }
+  .gallery-item-3 { margin-left: 15%;  margin-right: auto; width: 22%; }
 }
 
-.hero-anim {
-  animation: heroUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.hero-anim-2 { animation-delay: 120ms; }
-.hero-anim-3 { animation-delay: 240ms; }
-.hero-anim-4 { animation-delay: 360ms; }
-.hero-anim-5 { animation-delay: 480ms; }
+/* ── Vorszk microinteractions ── */
 
-/* New editorial hero */
-.hero-in {
-  animation: heroUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+/* Patrón A: fill desde abajo (usado en "Ver carta" y submit) */
+.vorszk-btn {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
 }
-.hero-in-delay { animation-delay: 200ms; }
+.vorszk-btn:hover .vorszk-btn-fill {
+  transform: translateY(0) !important;
+}
 
-/* ---- Reduced motion ---- */
+/* Patrón B: subrayado que crece desde izquierda (links de texto) */
+.vorszk-btn-text {
+  position: relative;
+}
+.vorszk-btn-text::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.vorszk-btn-text:hover::after {
+  width: 100%;
+}
+
+/* ── Float animation (logo hero) ── */
+@keyframes float {
+  0%, 100% { transform: translateY(-50%) translateY(0px); }
+  50%       { transform: translateY(-50%) translateY(-18px); }
+}
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-float { animation: none; }
+}
+
+/* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   .reveal,
-  .reveal.visible {
+  .reveal.revealed {
     opacity: 1;
     transform: none;
     transition: none;
   }
-  .hero-anim {
-    animation: none;
-    opacity: 1;
+  .hero-line,
+  .hero-meta,
+  .hero-sub,
+  .hero-stat {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
