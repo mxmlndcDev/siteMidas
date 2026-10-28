@@ -17,8 +17,7 @@ const SEDES = [
     slotTop: '$320K',    // ← actualizar manualmente
     amenities: ['Seguridad'],
     slots: [
-      'Lun–Mié: 07:00 a 06:00',
-      'Jue–Dom: 24 horas',
+      'Todos los días: 07:00 a 06:00',
     ],
     bingo: 'Mié–Dom: 14:30 a 21:00',
     juegos: [
@@ -39,8 +38,7 @@ const SEDES = [
     slotTop: '$280K',
     amenities: ['Estacionamiento gratuito', 'Seguridad'],
     slots: [
-      'Lun–Mié: 07:00 a 05:00',
-      'Jue–Dom: 24 horas',
+      'Todos los días: 07:00 a 06:00',
     ],
     bingo: 'Lun–Dom: 15:00 a 21:00',
     juegos: [
@@ -83,8 +81,7 @@ const SEDES = [
     slotTop: '$260K',
     amenities: ['Seguridad'],
     slots: [
-      'Lun–Mié: 07:00 a 06:00',
-      'Jue–Dom: 24 horas',
+      'Todos los días: 07:00 a 06:00',
     ],
     bingo: 'Mié–Dom: 14:00 a 21:00',
     juegos: [
