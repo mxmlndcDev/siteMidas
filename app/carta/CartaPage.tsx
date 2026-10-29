@@ -13,6 +13,21 @@ export interface MenuSection {
   highlight?: boolean;
 }
 
+// Corona de Grupo Midas (la misma del logo de cada sala).
+function CrownIcon() {
+  return (
+    <svg viewBox="78 238 224 268" className="h-[62%] w-auto" fill="white" aria-hidden="true">
+      <circle cx="191" cy="260" r="13" />
+      <circle cx="155" cy="307" r="13" />
+      <circle cx="227" cy="309" r="13" />
+      <circle cx="190" cy="328" r="13" />
+      <circle cx="97" cy="382" r="14" />
+      <circle cx="282" cy="382" r="14" />
+      <path d="M105 404 Q150 422 163 410 L190 357 L217 410 Q230 422 275 404 L248 492 Q190 476 132 492 Z" />
+    </svg>
+  );
+}
+
 function ItemRow({ item }: { item: MenuItem }) {
   return (
     <div className="flex justify-between items-baseline gap-2 py-1.5">
@@ -83,25 +98,50 @@ export default function CartaPage({
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link
-        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,900&family=Bebas+Neue&family=Cinzel:wght@600&display=swap"
         rel="stylesheet"
       />
       <div className="min-h-screen bg-white">
-        <header className="bg-white border-b-2 border-black px-4 py-6 sticky top-0 z-10">
+        <header className="bg-white border-b-2 border-black px-4 pt-8 pb-6">
           <div className="max-w-2xl mx-auto">
-            <h1
-              className="tracking-wide mb-1"
-              style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '3rem', lineHeight: 1 }}
-            >
-              MENÚ
-            </h1>
-            <p
-              className="tracking-wide"
-              style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.5rem', color: '#94855f' }}
-            >
-              {sede.toUpperCase()}
-            </p>
-            <div className="flex gap-2 mt-4">
+            {/* Encabezado igual al PDF: MENÚ + franja con corona y nombre de la sala */}
+            <div className="w-fit max-w-full">
+              <h1
+                className="text-black"
+                style={{
+                  fontFamily: "'Archivo', sans-serif",
+                  fontWeight: 900,
+                  fontStretch: '125%',
+                  fontSize: 'clamp(4rem, 21vw, 8.5rem)',
+                  lineHeight: 0.8,
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                MENÚ
+              </h1>
+              <div className="flex mt-2 h-10 sm:h-12">
+                <div
+                  className="flex items-center justify-center aspect-square h-full"
+                  style={{ backgroundColor: '#94855f' }}
+                >
+                  <CrownIcon />
+                </div>
+                <div className="flex-1 bg-black text-white flex items-center justify-center px-4">
+                  <span
+                    className="whitespace-nowrap"
+                    style={{
+                      fontFamily: "'Cinzel', serif",
+                      fontWeight: 600,
+                      fontSize: 'clamp(1rem, 4.4vw, 1.4rem)',
+                      letterSpacing: '0.02em',
+                    }}
+                  >
+                    Bingo {sede}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-6">
               <button
                 onClick={() => setExpanded(new Set(sections.map((_, i) => i)))}
                 className="px-4 py-2 text-white font-mono text-sm transition-colors"
