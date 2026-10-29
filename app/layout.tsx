@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
+import { SITE_URL, orgJsonLd } from "./sedes";
 
 const playfair = Playfair_Display({
     subsets: ["latin"],
@@ -16,8 +17,10 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-    title: "Grupo Midas | Experiencia de Juego",
-    description: "Seguridad, Gastronomía y los mejores sorteos de Buenos Aires.",
+    metadataBase: new URL(SITE_URL),
+    title: "Grupo Midas | Bingos en Ciudadela, Merlo, Hurlingham y Caseros",
+    description: "Cuatro salas de bingo y slots en Zona Oeste: Ciudadela, Merlo, Hurlingham y Caseros. Horarios, jugadas, carta y Club Midas.",
+    alternates: { canonical: "/" },
 };
 
 export default function RootLayout({
@@ -28,6 +31,10 @@ export default function RootLayout({
     return (
         <html lang="es" className={`${playfair.variable} ${dmSans.variable}`}>
             <body className="font-body antialiased selection:bg-blue-light selection:text-blue">
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd()) }}
+                />
                 {children}
             </body>
         </html>

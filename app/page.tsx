@@ -2,96 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { SEDES } from './sedes';
 
 const CRM_URL = 'https://script.google.com/macros/s/AKfycbzGLLJxwH5-wtTis1KhijWPIXrdE2Eo56YBFGlOGMe6iac8H9Chv0u5gNMXvJ2CjTh4/exec';
-
-const SEDES = [
-  {
-    src: '/images/fachada/bingo ciudadela.png',
-    name: 'Bingo Ciudadela',
-    loc: 'Av. Rivadavia 11732, Ciudadela',
-    label: 'Sede ciudadela',
-    menuUrl: '/carta/ciudadela',
-    mapsUrl: 'https://maps.google.com/?q=Av.+Rivadavia+11732+Ciudadela+Buenos+Aires',
-    pozo: '$4.2M',       // ← actualizar manualmente
-    slotTop: '$320K',    // ← actualizar manualmente
-    amenities: ['Seguridad'],
-    slots: [
-      'Todos los días: 07:00 a 06:00',
-    ],
-    bingo: 'Mié–Dom: 14:30 a 21:00',
-    juegos: [
-      { nombre: 'Bingo Extra', dias: 'Mié–Dom', detalle: '1% pozo · bolilla libre' },
-      { nombre: 'Bingo Oro', dias: 'Mié–Dom', detalle: '15% pozo · tope 42 · 15:30 16:30 17:30 18:30 19:30 20:30' },
-      { nombre: 'Bingo Plata', dias: 'Mié–Dom', detalle: '10% pozo · tope 46 · 15:30 16:30 17:30 18:30 19:30 20:30' },
-      { nombre: 'Jugada Especial', dias: 'Todos los Jueves', detalle: '5% pozo · 19:00 · bolilla libre' },
-    ],
-  },
-  {
-    src: '/images/fachada/bingo merlo.png',
-    name: 'Bingo Merlo',
-    loc: 'Av. del Libertador 753, Merlo',
-    label: 'Sede Merlo',
-    menuUrl: '/carta/merlo',
-    mapsUrl: 'https://maps.google.com/?q=Av.+del+Libertador+753+Merlo+Buenos+Aires',
-    pozo: '$3.8M',
-    slotTop: '$280K',
-    amenities: ['Estacionamiento gratuito', 'Seguridad'],
-    slots: [
-      'Todos los días: 07:00 a 06:00',
-    ],
-    bingo: 'Lun–Dom: 15:00 a 21:00',
-    juegos: [
-      { nombre: 'Bingo Extra', dias: 'Todos los días', detalle: '1% pozo · bolilla libre' },
-      { nombre: 'Bingo Oro', dias: 'Todos los días', detalle: '15% pozo · tope 42 · 15:30 16:30 17:30 18:30 19:30 20:30' },
-      { nombre: 'Bingo Plata', dias: 'Todos los días', detalle: '10% pozo · tope 46 · 15:30 16:30 17:30 18:30 19:30 20:30' },
-      { nombre: 'Jugada Especial', dias: 'Todos los Jueves', detalle: '5% pozo · 19:00 · bolilla libre' },
-    ],
-  },
-  {
-    src: '/images/fachada/bingo hurlingham.png',
-    name: 'Bingo Hurlingham',
-    loc: 'Roca 2070, Hurlingham',
-    label: 'Sede Hurlingham',
-    menuUrl: '/carta/hurlingham',
-    mapsUrl: 'https://maps.google.com/?q=Roca+2070+Hurlingham+Buenos+Aires',
-    pozo: '$2.1M',
-    slotTop: '$195K',
-    amenities: ['Estacionamiento gratuito', 'Seguridad'],
-    slots: [
-      'Jue–Dom: 08:00 a 04:00',
-      'Vie–Sáb y feriados: 08:00 a 05:00',
-    ],
-    bingo: 'Vie–Dom: 15:00 a 21:00',
-    juegos: [
-      { nombre: 'Bingo Extra', dias: 'Vie–Dom', detalle: '1% pozo · bolilla libre' },
-      { nombre: 'Bingo Oro', dias: 'Vie–Dom', detalle: '15% pozo · tope 42 · 15:30 16:30 17:30 18:30 19:30 20:30' },
-      { nombre: 'Bingo Plata', dias: 'Vie–Dom', detalle: '10% pozo · tope 46 · 15:30 16:30 17:30 18:30 19:30 20:30' },
-      { nombre: 'Jugada Especial', dias: 'Todos los Viernes', detalle: '5% pozo · 19:00 · bolilla libre' },
-    ],
-  },
-  {
-    src: '/images/fachada/bingo caseros.png',
-    name: 'Bingo Caseros',
-    loc: 'Av. San Martín 2780, Caseros',
-    label: 'Sede Caseros',
-    menuUrl: '/carta/caseros',
-    mapsUrl: 'https://maps.google.com/?q=Av.+San+Martín+2780+Caseros+Buenos+Aires',
-    pozo: '$3.5M',
-    slotTop: '$260K',
-    amenities: ['Seguridad'],
-    slots: [
-      'Todos los días: 07:00 a 06:00',
-    ],
-    bingo: 'Mié–Dom: 14:00 a 21:00',
-    juegos: [
-      { nombre: 'Bingo Extra', dias: 'Mié–Dom', detalle: '1% pozo · bolilla libre' },
-      { nombre: 'Bingo Oro', dias: 'Mié–Dom', detalle: '15% pozo · tope 42 · 15:30 16:30 17:30 18:30 19:30 20:30' },
-      { nombre: 'Bingo Plata', dias: 'Mié–Dom', detalle: '10% pozo · tope 46 · 15:30 16:30 17:30 18:30 19:30 20:30' },
-      { nombre: 'Jugada Especial', dias: 'Todos los Sábados', detalle: '5% pozo · 19:00 · bolilla libre' },
-    ],
-  },
-];
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -429,9 +343,12 @@ export default function LandingPage() {
                       <span className="block text-[9px] tracking-[0.28em] uppercase text-text-muted mb-1.5">
                         {s.label}
                       </span>
-                      <span className="font-display text-2xl md:text-4xl tracking-tight text-text-primary leading-none">
+                      <Link
+                        href={`/salas/${s.slug}`}
+                        className="font-display text-2xl md:text-4xl tracking-tight text-text-primary leading-none hover:text-blue transition-colors"
+                      >
                         {s.name}
-                      </span>
+                      </Link>
                       <p className="flex items-center gap-1 mt-2 text-[11px] text-text-muted">
                         <PinIcon className="w-3 h-3 shrink-0" />
                         {s.loc}
